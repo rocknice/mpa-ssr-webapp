@@ -7,7 +7,6 @@
     <title>{% block title %}{% endblock %}</title>
     <link href="/styles/bootstrap.min.css" rel="stylesheet">
     <link href="/styles/main.css" rel="stylesheet">
-    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
     <!-- <script src="/scripts/common.js"></script> -->
     {% block head %}
     {% endblock %}
@@ -22,8 +21,8 @@
             </div>
         </nav>
     </header>
-    <div class="container">
-        {% block navigation %}{% endblock %}
+    {% block navigation %}{% endblock %}
+    <div class="container" id="app">
         {% block content %}{% endblock %}
     </div>
     <footer class="footer">
@@ -31,6 +30,19 @@
             <p class="pull-left">© 图书管理系统 2019</p>
         </div>
     </footer>
+    <script src="https://cdn.staticfile.org/x-tag/2.0.9-alpha/x-tag-raw.js"></script>
+    <script src="https://cdn.staticfile.org/jquery/3.3.1/jquery.js"></script>
+    <script src="https://cdn.staticfile.org/jquery.pjax/2.0.1/jquery.pjax.js"></script>
+    <script src="https://cdn.staticfile.org/quicklink/1.0.0/quicklink.umd.js"></script>
+    <script>
+        // 1、quicklink可以指定落地页加载后，预加载的js文件，用空闲时间把资源prefetch回来
+        // 2、预获取的js资源可以自己指定，如下
+        // 3、只会把视窗内的js资源预获取回来
+        quicklink({
+            urls: ['scripts/create.bundle.js']
+        });
+        $(document).pjax("a", "#app");
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

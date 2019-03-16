@@ -1,4 +1,5 @@
 const bookModel = require('../models/index.js')
+const cheerio = require('cheerio')
 const {
     URLSearchParams
 } = require("url");
@@ -7,9 +8,25 @@ module.exports = {
         return async (ctx, next) => {
             const model = new bookModel();
             const result = await model.actionInit();
-            ctx.body = await ctx.render('home', {
+            const html = await ctx.render('home', {
                 data: result.data
             })
+            const $ = cheerio.load(html);
+            if (ctx.request.header["x-pjax"]) {
+                let _result = "";
+                $(".pjaxcontent").each(function () {
+                    _result += $(this).html()
+                })
+                $(".layload-js").each(function () {
+                    _result +=  `<script src="${$(this).attr("src")}"></script>`;
+                })
+                // $(".layload-css").each(function () {
+                //     _result += $(this).html()
+                // })
+                ctx.body = _result
+            } else {
+                ctx.body = html
+            }
         }
     },
     view() {
@@ -17,9 +34,18 @@ module.exports = {
             const params = ctx.query
             const model = new bookModel();
             const result = await model.actionView(params);
-            ctx.body = await ctx.render('view', {
+            const html = await ctx.render('view', {
                 data: result.data
             })
+            if (ctx.request.header["x-pjax"]) {
+                const $ = cheerio.load(html);
+                ctx.body = $("#js-hooks-data").html()
+            } else {
+                ctx.body = html
+            }
+            // ctx.body = await ctx.render('view', {
+            //     data: result.data
+            // })
         }
     },
     delete() {
@@ -37,7 +63,21 @@ module.exports = {
     },
     createBook() {
         return async (ctx, next) => {
-            ctx.body = await ctx.render('create')
+            const html = await ctx.render('create')
+            const $ = cheerio.load(html);
+            if (ctx.request.header["x-pjax"]) {
+                let _result = "";
+                $(".pjaxcontent").each(function () {
+                    _result += $(this).html()
+                })
+                $(".layload-js").each(function () {
+                    _result +=  `<script src="${$(this).attr("src")}"></script>`;
+                })
+                console.log('------', _result)
+                ctx.body = _result
+            } else {
+                ctx.body = html
+            }
         }
     },
     create() {
@@ -77,9 +117,15 @@ module.exports = {
             const params = ctx.query
             const model = new bookModel();
             const result = await model.updatePage(params);
-            ctx.body = await ctx.render('update', {
+            const html = await ctx.render('update', {
                 data: result.data
             })
+            if (ctx.request.header["x-pjax"]) {
+                const $ = cheerio.load(html);
+                ctx.body = $("#js-hooks-data").html()
+            } else {
+                ctx.body = html
+            }
         }
     },
     update() {
